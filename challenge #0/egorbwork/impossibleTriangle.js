@@ -2,20 +2,20 @@ class TriangleDrawingEngine {
 
     constructor(drawingContext) {
         this.drawingContext = drawingContext;
-        this.cubeDimension = 100;
+        this.cubeDimension = 90;
         this.yellowColor = '#FFD700';
         this.redColor = '#FF6347';
         this.greenColor = '#008080';
-        this.destinationOverAllColors = 'all';
+        this.destinationOverAllColors = [this.yellowColor, this.redColor, this.greenColor];
+        this.positionXGenerator = this.animationXPositionGeneration();
+        this.positionYGenerator = this.animationYPositionGeneration();
     }
 
-    drawCube(coordinateX = 0, coordinateY = 0, destinationOverColor = false) {
+    drawCube(coordinateX = 0, coordinateY = 0, destinationOverColors = []) {
         this.drawingContext.save();
 
-        this.drawingContext.rotate(this.convertDegreesToRadians(20));
-
         this.drawingContext.globalCompositeOperation =
-            destinationOverColor === this.redColor || destinationOverColor === this.destinationOverAllColors
+            destinationOverColors.includes(this.redColor)
                 ? 'destination-over' : 'source-over';
         this.drawingContext.beginPath();
         this.drawingContext.moveTo(coordinateX, coordinateY);
@@ -27,7 +27,7 @@ class TriangleDrawingEngine {
         this.drawingContext.fill();
 
         this.drawingContext.globalCompositeOperation =
-            destinationOverColor === this.greenColor || destinationOverColor === this.destinationOverAllColors
+            destinationOverColors.includes(this.greenColor)
                 ? 'destination-over' : 'source-over';
         this.drawingContext.beginPath();
         this.drawingContext.moveTo(coordinateX, coordinateY);
@@ -39,7 +39,7 @@ class TriangleDrawingEngine {
         this.drawingContext.fill();
 
         this.drawingContext.globalCompositeOperation =
-            destinationOverColor === this.yellowColor || destinationOverColor === this.destinationOverAllColors
+            destinationOverColors.includes(this.yellowColor)
                 ? 'destination-over' : 'source-over';
         this.drawingContext.beginPath();
         this.drawingContext.moveTo(coordinateX, coordinateY - this.cubeDimension);
@@ -53,32 +53,74 @@ class TriangleDrawingEngine {
         this.drawingContext.restore();
     }
 
-    drawImpossibleTriangle() {
-        // All positions were selected by eye
-        // Left triangle line
-        this.drawCube(400, 700);
-        this.drawCube(420, 550);
-        this.drawCube(440, 400);
-        this.drawCube(460, 250);
+    drawImpossibleTriangle(animationPositionX = 0, animationPositionY = 0) {
+        // All positions now were calculated
+        // Moving vertical
+        this.drawCube(400, 700 - animationPositionY);
+        this.drawCube(400, 550 - animationPositionY);
+        this.drawCube(400, 400 - animationPositionY);
 
-        // Right triangle line
-        this.drawCube(600, 330);
-        this.drawCube(740, 400);
-        this.drawCube(890, 490);
+        // Moving from right to left and from top to bottom
+        this.drawCube(400 + animationPositionX, 250 + (animationPositionY / 2));
+        this.drawCube(530 + animationPositionX, 325 + (animationPositionY / 2));
+        this.drawCube(660 + animationPositionX, 400 + (animationPositionY / 2));
 
-        // Base triangle line
-        this.drawCube(570, 630, this.destinationOverAllColors);
-        this.drawCube(730, 560, this.redColor);
+
+        // Moving from left to right and from top to bottom
+
+        // This cube is destination over for start
+        if (animationPositionY <= 75) {
+            this.drawCube(
+                790 - animationPositionX,
+                475 + (animationPositionY / 2)
+            );
+        }
+        // Specific order to keep required order of colors
+        this.drawCube(530 - animationPositionX, 625 + (animationPositionY / 2), this.destinationOverAllColors);
+        this.drawCube(
+            660 - animationPositionX,
+            550 + (animationPositionY / 2),
+            animationPositionY <= 75 ? [this.redColor] : [this.redColor, this.yellowColor]
+        );
+
+        // Now this cube has only red color as destination over
+        if (animationPositionY >= 75) {
+            this.drawCube(
+                790 - animationPositionX,
+                475 + (animationPositionY / 2),
+                [this.redColor]
+            );
+        }
     }
 
-    convertDegreesToRadians(degrees) {
-        return (Math.PI / 180) * degrees;
+    animateImpossibleTriangle() {
+        this.drawingContext.clearRect(0, 0, 1000, 1000);
+        this.drawImpossibleTriangle(this.positionXGenerator.next().value, this.positionYGenerator.next().value);
+        window.requestAnimationFrame(() => {this.animateImpossibleTriangle();});
+    }
+
+    * animationXPositionGeneration() {
+        while(true) {
+            for (let counter = 0; counter <= 150; counter += 2) {
+                // Keeping same speed animation speed with Y coordinates, but keeping in ming that instead of 150
+                // it uses 130 for standard cycle
+                yield counter * 13 / 15;
+            }
+        }
+    }
+
+    * animationYPositionGeneration() {
+        while(true) {
+            for (let counter = 0; counter <= 150; counter += 2) {
+                yield counter;
+            }
+        }
     }
 }
 
 document.addEventListener("DOMContentLoaded", function() {
     var drawingEngine = new TriangleDrawingEngine(document.getElementById('triangle').getContext('2d'));
-    drawingEngine.drawImpossibleTriangle();
+    drawingEngine.animateImpossibleTriangle();
 });
 
 
