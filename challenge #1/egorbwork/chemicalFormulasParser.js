@@ -1,72 +1,92 @@
-function parseChemicalFormula(chemicalFormula) {
-    let chemicalFormulaProcessed = chemicalFormula;
-    let resultContainer = {};
-    let bracersGroupMatch, squaresGroupMatch;
-    let regexpSquaresMultiplier = /\[.*\][0-9]+/g;
-    let regexpBracersMultiplier = /\(.*\)[0-9]+/g;
-    while (squaresGroupMatch = regexpSquaresMultiplier.exec(chemicalFormulaProcessed)) {
-        let squaresGroup = squaresGroupMatch[0];
-        chemicalFormulaProcessed = chemicalFormulaProcessed.replace(squaresGroup, '');
-        parseSquaresGroup(resultContainer, squaresGroup);
+class chemicalFormulasParser {
+    constructor() {
+        this.chemicalFormulaProcessed = '';
+        this.regexpSquaresGroup = /\[.*\][0-9]+/g;
+        this.regexpBracersGroup = /\(.*\)[0-9]+/g;
+        this.regexBracersMultiplier = /\][0-9]+/g;
+        this.regexBracersMultiplier = /\)[0-9]+/g;
+        this.regexpForAtomsGroups = /[A-Z][a-z]?[0-9]*/g;
+        this.regexpForAtomNumber = /[A-Z][a-z]?|[0-9]+/g;
+        this.result = {};
     }
-    while (bracersGroupMatch = regexpBracersMultiplier.exec(chemicalFormulaProcessed)) {
-        let bracersGroup = bracersGroupMatch[0];
-        chemicalFormulaProcessed = chemicalFormulaProcessed.replace(bracersGroup, '');
-        parseBracersGroup(resultContainer, bracersGroup);
+
+    parse(chemicalFormula) {
+        this.result = {};
+        this.chemicalFormulaProcessed = chemicalFormula;
+
+        this.parseSquaresGroups();
+        this.parseBracersGroups();
+        this.parseSimpleAtomGroups();
+
+        return this.result;
     }
-    parseSimpleAtomGroups(resultContainer, chemicalFormulaProcessed);
 
-    return resultContainer;
-}
-
-function parseSquaresGroup(resultContainer, squaresGroup) {
-    let squaresGroupProcessed = squaresGroup;
-    let regexBracersMultiplier = /\][0-9]+/g;
-    let BracersMultiplierMatch = regexBracersMultiplier.exec(squaresGroup);
-    let squaresMultiplier = parseInt(BracersMultiplierMatch[0].substr(1, BracersMultiplierMatch[0].length - 1));
-    let regexpBracersMultiplier = /\(.*\)[0-9]+/g;
-    let bracersGroupMatch;
-    while (bracersGroupMatch = regexpBracersMultiplier.exec(squaresGroup)) {
-        let bracersGroup = bracersGroupMatch[0];
-        squaresGroupProcessed = squaresGroupProcessed.replace(bracersGroup, '');
-        parseBracersGroup(resultContainer, bracersGroup, squaresMultiplier);
+    parseSquaresGroups() {
+        let squaresGroupMatches = this.chemicalFormulaProcessed.match(this.regexpSquaresGroup);
+        let reducedChemicalFormulaProcessed;
+        for (let squaresGroupMatchKey in squaresGroupMatches) {
+            let squaresGroup = squaresGroupMatches[squaresGroupMatchKey];
+            reducedChemicalFormulaProcessed = this.chemicalFormulaProcessed.replace(squaresGroup, '');
+            this.chemicalFormulaProcessed = squaresGroup;
+            this.parseSquaresGroup();
+        }
+        this.chemicalFormulaProcessed = reducedChemicalFormulaProcessed || this.chemicalFormulaProcessed;
     }
-    parseSimpleAtomGroups(resultContainer, squaresGroupProcessed, squaresMultiplier);
-}
 
-function parseBracersGroup(resultContainer, bracersGroup, multiplier = 1) {
-    let regexBracersMultiplier = /\)[0-9]+/g;
-    let BracersMultiplierMatch = regexBracersMultiplier.exec(bracersGroup);
-    let bracersMultiplier = parseInt(BracersMultiplierMatch[0].substr(1, BracersMultiplierMatch[0].length - 1));
-    parseSimpleAtomGroups(resultContainer, bracersGroup, bracersMultiplier * multiplier);
-}
-
-function parseSimpleAtomGroups(resultContainer, atomGroupString, multiplier = 1) {
-    let regexpForAtomsGroups = /[A-Z][a-z]?[0-9]*/g;
-    let atomGroup;
-    while (atomGroup = regexpForAtomsGroups.exec(atomGroupString)) {
-        parseAtomGroup(resultContainer, atomGroup, multiplier);
+    parseSquaresGroup() {
+        let BracersMultiplierMatches = this.chemicalFormulaProcessed.match(this.regexBracersMultiplier);
+        let squaresMultiplier = parseInt(BracersMultiplierMatches[0].substr(1));
+        this.parseBracersGroups(squaresMultiplier);
+        this.parseSimpleAtomGroups(squaresMultiplier);
     }
-}
 
-function parseAtomGroup(resultContainer, atomGroup, multiplier = 1) {
-    let regexpForAtomNumber = /[A-Z][a-z]?|[0-9]+/g;
-    let parsedAtomName = regexpForAtomNumber.exec(atomGroup);
-    let atomName = parsedAtomName[0];
-    let parsedNumberMatch;
-    let atomNumber = (parsedNumberMatch = regexpForAtomNumber.exec(atomGroup)) ? parseInt(parsedNumberMatch[0]) : 1;
-    if (resultContainer.hasOwnProperty(atomName)) {
-        resultContainer[atomName] += atomNumber * multiplier;
-    } else {
-        resultContainer[atomName] = atomNumber * multiplier;
+    parseBracersGroups(multiplier = 1) {
+        let bracersGroupMatches = this.chemicalFormulaProcessed.match(this.regexpBracersGroup);
+        let reducedChemicalFormulaProcessed;
+        for (let bracersGroupMatchKey in bracersGroupMatches) {
+            let bracersGroup = bracersGroupMatches[bracersGroupMatchKey];
+            reducedChemicalFormulaProcessed = this.chemicalFormulaProcessed.replace(bracersGroup, '');
+            this.chemicalFormulaProcessed = bracersGroup;
+            this.parseBracersGroup(multiplier);
+        }
+        this.chemicalFormulaProcessed = reducedChemicalFormulaProcessed || this.chemicalFormulaProcessed;
+    }
+
+    parseBracersGroup(multiplier = 1) {
+        let bracersMultiplierMatches = this.chemicalFormulaProcessed.match(this.regexBracersMultiplier);
+        let bracersMultiplier = parseInt(bracersMultiplierMatches[0].substr(1));
+        this.parseSimpleAtomGroups(bracersMultiplier * multiplier);
+    }
+
+    parseSimpleAtomGroups(multiplier = 1) {
+        let atomGroupMatches = this.chemicalFormulaProcessed.match(this.regexpForAtomsGroups);
+        for (let atomGroupKey in atomGroupMatches) {
+            this.parseAtomGroup(atomGroupMatches[atomGroupKey], multiplier);
+        }
+    }
+
+    parseAtomGroup(atomGroup, multiplier = 1) {
+        let parsedAtomNameNumber = atomGroup.match(this.regexpForAtomNumber);
+        let atomName = parsedAtomNameNumber[0];
+        let atomNumber = (parsedAtomNameNumber.length > 1) ? parseInt(parsedAtomNameNumber[1]) : 1;
+        this.addAtomGroup(atomName, atomNumber * multiplier);
+    }
+
+    addAtomGroup(atomName, atomNumber) {
+        if (this.result.hasOwnProperty(atomName)) {
+            this.result[atomName] += atomNumber;
+        } else {
+            this.result[atomName] = atomNumber;
+        }
     }
 }
 
 function testParseChemicalFormula() {
-    console.log(parseChemicalFormula('H2O'));
-    console.log(parseChemicalFormula('CH3COOH'));
-    console.log(parseChemicalFormula('Al2SO4(CH3CO2)4'));
-    console.log(parseChemicalFormula('K4[ON(SO3)2]2'));
+    let parser = new chemicalFormulasParser();
+    console.log(parser.parse('H2O'));
+    console.log(parser.parse('CH3COOH'));
+    console.log(parser.parse('Al2SO4(CH3CO2)4'));
+    console.log(parser.parse('K4[ON(SO3)2]2'));
 }
 
 testParseChemicalFormula();
