@@ -1,0 +1,3 @@
+function jsmd(o) {
+	return o.toString().indexOf('JSMD') !== -1
+}
