@@ -1,7 +1,7 @@
 'use strict';
 
 const symbols = require('./chemical-symbols.json')
-const phrase = 'Lorem ipsum dolor sit amet, consectetur adipiscing elit.'
+const phrase = process.argv[3] || 'Lorem ipsum dolor sit amet, consectetur adipiscing elit.'
 const foundSymbols = []
 
 const findSymbols = (() => {
