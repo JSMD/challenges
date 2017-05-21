@@ -118,5 +118,3 @@ chemicalSymbols.set('mc', 'Mc');
 chemicalSymbols.set('lv', 'Lv');
 chemicalSymbols.set('ts', 'Ts');
 chemicalSymbols.set('og', 'Og');
-
-export { chemicalSymbols };
