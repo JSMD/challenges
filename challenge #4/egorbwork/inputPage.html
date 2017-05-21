@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Chemical symbols searcher page</title>
+    <script src="chemicalSymbolsMap.js"></script>
+    <script src="chemicalSymbolsStringFinder.js"></script>
+    <script src="chemicalSymbolsApplication.js"></script>
+</head>
+<body>
+<div>
+    <p>Strategies:</p>
+    <input type="radio" name="find-strategy" value="single-first" checked>Single Character first
+    <br>
+    <input type="radio" name="find-strategy" value="pair-first">Pair of Character first
+    <br>
+    <p>Input for chemical symbols search:</p>
+    <input id="stringForSearch" type="text" name="string-for-search">
+    <button type="button" id="findSymbolsButton">Find Chemical symbols</button>
+    <div>
+        <p id="resultContainer"></p>
+    </div>
+</div>
+</body>
+</html>
