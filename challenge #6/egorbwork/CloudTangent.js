@@ -8,7 +8,7 @@ class CloudTangent {
         this.point = point;
         this.firstCircle = firstCircle;
         this.secondCircle = secondCircle;
-        this.usageStatus = false;
+        this.usageStatus = true;
         this.drawnWith = [];
     }
 
@@ -17,20 +17,6 @@ class CloudTangent {
      */
     setUsed(status) {
         this.usageStatus = status;
-    }
-
-    /**
-     * @param {CloudCircle} circle
-     *
-     * @returns {CloudCircle|null}
-     */
-    getTangentCircle(circle) {
-        if (this.firstCircle === circle) {
-            return this.secondCircle;
-        } else if (this.secondCircle === circle) {
-            return this.firstCircle;
-        }
-        return null;
     }
 
     /**

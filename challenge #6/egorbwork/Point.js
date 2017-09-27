@@ -17,4 +17,12 @@ class Point {
             (point.coordinateX - this.coordinateX) ** 2 + (point.coordinateY - this.coordinateY) ** 2
         );
     }
+
+    /**
+     * @param {Point} point
+     * @returns {boolean}
+     */
+    isSamePoint(point) {
+        return this.coordinateX === point.coordinateX && this.coordinateY === point.coordinateY;
+    }
 }

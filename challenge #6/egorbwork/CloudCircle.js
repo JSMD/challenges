@@ -67,7 +67,7 @@ class CloudCircle {
      */
     isTangentCircle(circle) {
         let distanceBetweenCircles = this.centerPoint.getDistanceFor(circle.centerPoint);
-        return distanceBetweenCircles < (this.radius + circle.radius);
+        return distanceBetweenCircles < (this.radius + circle.radius) && !this.isCircleInside(circle);
     }
 
     /**
@@ -76,7 +76,7 @@ class CloudCircle {
      */
     isPointInsideOfCircle(point) {
         let distanceTillPoint = point.getDistanceFor(this.centerPoint);
-        return distanceTillPoint < this.radius;
+        return distanceTillPoint <= this.radius;
     }
 
     /**
@@ -86,6 +86,16 @@ class CloudCircle {
         return this.tangents.filter(
             tangent => tangent.usageStatus
         );
+    }
+
+    /**
+     * @param {CloudCircle} circle
+     * @returns {boolean}
+     */
+    isCircleInside(circle) {
+        return this.isPointInsideOfCircle(circle.centerPoint)
+            && this.radius > circle.radius
+            && (circle.centerPoint.getDistanceFor(this.centerPoint) + circle.radius) < this.radius;
     }
 
     /**
