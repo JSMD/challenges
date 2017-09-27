@@ -15,7 +15,7 @@ class CloudDrawingEngine {
     drawCloud(cloud) {
         this.prepareCloud(cloud);
         this.drawingContext.clearRect(0, 0, 5000, 5000);
-        for(let circle of cloud) {
+        for(let circle of cloud.sort(this.compareCircleByUsedTangents)) {
             let currentTangents = circle.getUsedTangents();
             if (currentTangents.length > 2) {
                 for (let tangentsGroup of this.getGroupedTangents(currentTangents)) {
@@ -190,5 +190,14 @@ class CloudDrawingEngine {
 
             yield  {first: tangent, second: availableTangent};
         }
+    }
+
+    /**
+     * @param {CloudCircle} firstCircle
+     * @param {CloudCircle} secondCircle
+     * @returns {number}
+     */
+    compareCircleByUsedTangents(firstCircle, secondCircle) {
+        return firstCircle.getUsedTangents().length - secondCircle.getUsedTangents().length;
     }
 }
