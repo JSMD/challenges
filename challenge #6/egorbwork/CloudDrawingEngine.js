@@ -1,10 +1,11 @@
 class CloudDrawingEngine {
     /**
      * @param {CanvasRenderingContext2D} drawingContext
+     * @param {number} drawingContext
      */
-    constructor(drawingContext) {
+    constructor(drawingContext, lineWidth) {
         this.drawingContext = drawingContext;
-        this.drawingContext.lineWidth = 5;
+        this.drawingContext.lineWidth = lineWidth;
         this.drawingContext.strokeStyle = 'black';
     }
 
@@ -12,6 +13,7 @@ class CloudDrawingEngine {
      * @param {Array<CloudCircle>}
      */
     drawCloud(cloud) {
+        this.prepareCloud(cloud);
         this.drawingContext.clearRect(0, 0, 5000, 5000);
         for(let circle of cloud) {
             let currentTangents = circle.getUsedTangents();
@@ -23,6 +25,7 @@ class CloudDrawingEngine {
                         circle.centerPoint.coordinateX,
                         circle.centerPoint.coordinateY,
                         circle.radius,
+                        // Full circle visibility for Testing
                         // 0, 2 * Math.PI,
                         circle.calculateArcAngleForPoint(firstTangent.point),
                         circle.calculateArcAngleForPoint(secondTangent.point),
@@ -31,6 +34,11 @@ class CloudDrawingEngine {
                     firstTangent.addDrawnWith(secondTangent);
                     secondTangent.addDrawnWith(firstTangent);
                     this.drawingContext.stroke();
+                    // Tangent Points drawing for testing
+                    // this.drawingContext.beginPath();
+                    // this.drawingContext.fillStyle = 'red';
+                    // this.drawingContext.fillRect(firstTangent.point.coordinateX, firstTangent.point.coordinateY, 5, 5);
+                    // this.drawingContext.fillRect(secondTangent.point.coordinateX, secondTangent.point.coordinateY, 5, 5);
                 }
             } else {
                 let [firstTangent, secondTangent] = currentTangents;
@@ -39,6 +47,7 @@ class CloudDrawingEngine {
                     circle.centerPoint.coordinateX,
                     circle.centerPoint.coordinateY,
                     circle.radius,
+                    // Full circle visibility for Testing
                     // 0, 2 * Math.PI,
                     circle.calculateArcAngleForPoint(firstTangent.point),
                     circle.calculateArcAngleForPoint(secondTangent.point),
@@ -47,9 +56,42 @@ class CloudDrawingEngine {
                 firstTangent.addDrawnWith(secondTangent);
                 secondTangent.addDrawnWith(firstTangent);
                 this.drawingContext.stroke();
+                // Tangent Points drawing for testing
+                // this.drawingContext.beginPath();
+                // this.drawingContext.fillStyle = 'red';
+                // this.drawingContext.fillRect(firstTangent.point.coordinateX, firstTangent.point.coordinateY, 5, 5);
+                // this.drawingContext.fillRect(secondTangent.point.coordinateX, secondTangent.point.coordinateY, 5, 5);
             }
         }
 
+    }
+
+    /**
+     * @param {Array<CloudCircle>}
+     */
+    prepareCloud(cloud) {
+        let preparedList = [];
+        for (let circle of cloud) {
+            preparedList.push(circle);
+            // Calculate tangents
+            let remainingCircles = cloud.filter(remainingCircle => !preparedList.includes(remainingCircle));
+            for (let remainingCircle of remainingCircles) {
+                if (circle.isTangentCircle(remainingCircle)) {
+                    circle.calculateCloudTangentsForCircle(remainingCircle);
+                }
+            }
+            // Mark not used in cloud tangents
+            for (let tangent of circle.tangents) {
+                for (let remainingCircle of cloud) {
+                    if (remainingCircle !== tangent.firstCircle
+                        && remainingCircle !== tangent.secondCircle
+                        && remainingCircle.isPointInsideOfCircle(tangent.point)
+                    ) {
+                        tangent.setUsed(false);
+                    }
+                }
+            }
+        }
     }
 
     /**
