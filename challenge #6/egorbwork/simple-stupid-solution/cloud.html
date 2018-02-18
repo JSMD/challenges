@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Cloud Generator</title>
+    <script src="CloudGeneratorBuilder.js"></script>
+    <script src="CloudCircle.js"></script>
+    <script src="Point.js"></script>
+    <script src="CloudDrawingEngine.js"></script>
+    <script src="application.js"></script>
+</head>
+<body>
+<div style="position: fixed; top: 0">
+    <label for="numberOfCircles">Number of Circles</label>
+    <input id="numberOfCircles" type="number" min="2" max="100" value="8">
+    <button id="redraw" type="button">Draw</button>
+    <button id="scheme" type="button" data-text="Cloud">Scheme</button>
+</div>
+<div>
+    <canvas id="cloud" width=1200px" height="1200px">
+        <div>
+            To be able to see content, please use a modern version of Chrome or Firefox!
+        </div>
+    </canvas>
+</div>
+</body>
+</html>
